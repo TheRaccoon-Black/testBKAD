@@ -65,7 +65,7 @@
                     @csrf
                     <input type="hidden" name="laporan_id" id="lap_id">
                     <div class="mb-3">
-                        <label class="form-label fw-bold text-primary">Tanggapan Anda (Petugas)</label>
+                        <label class="form-label fw-bold text-primary">Tanggapan Anda (Petugas.)</label>
                         <textarea name="tanggapan" class="form-control" rows="3" placeholder="Tulis instruksi atau jawaban..." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Kirim Tanggapan</button>
