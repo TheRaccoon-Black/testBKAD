@@ -12,7 +12,11 @@ class LaporanController extends Controller
      */
     public function index()
     {
-        //
+        $laporans = Laporan::with(['user', 'kategori'])->latest()->paginate(10);
+
+        $rekapBulanan = Laporan::getRekapBulanan();
+
+        return view('laporan.view_rekap_laporan_bulanan', compact('laporans', 'rekapBulanan'));
     }
 
     /**
