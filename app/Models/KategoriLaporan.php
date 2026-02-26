@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KategoriLaporan extends Model
 {
-    protected $table = 'kategori_laporan'; 
+    protected $table = 'kategori_laporans';
     protected $fillable = ['nama_kategori', 'deskripsi'];
 
     public function laporan(): HasMany

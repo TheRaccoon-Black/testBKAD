@@ -9,7 +9,6 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Tabel Rekapitulasi Laporan</h5>
-            <small class="text-muted float-end">Data Agregasi SQL View</small>
         </div>
         <div class="table-responsive text-nowrap">
             <table class="table table-hover table-striped">
