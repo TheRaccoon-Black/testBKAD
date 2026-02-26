@@ -18,3 +18,6 @@ Route::get('/', function () {
 });
 
 Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+Route::get('/portal-publik', function () {
+    return view('laporan.publik');
+})->name('laporan.publik');
