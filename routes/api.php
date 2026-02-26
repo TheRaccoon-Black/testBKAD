@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/laporan-publik', [LaporanController::class, 'index']);
+Route::get('/laporan/{id}', [LaporanController::class, 'show']);

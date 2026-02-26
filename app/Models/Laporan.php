@@ -44,7 +44,7 @@ class Laporan extends Model
         return $this->belongsTo(KategoriLaporan::class, 'kategori_id');
     }
 
-    public function tanggapan(): HasMany
+    public function tanggapans(): HasMany
     {
         return $this->hasMany(Tanggapan::class, 'laporan_id');
     }
