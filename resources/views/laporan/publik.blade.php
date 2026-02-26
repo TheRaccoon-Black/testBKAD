@@ -7,7 +7,7 @@
             <h4 class="fw-bold py-3 mb-4">
                 <span class="text-muted fw-light">Portal /</span> Aduan Masyarakat Terbuka
             </h4>
-            <p class="mb-4">Menampilkan data transparan dengan detail tanggapan petugas secara real-time.</p>
+            <p class="mb-4">Monitor aduan masyarakat dan berikan tanggapan langsung secara real-time.</p>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>No</th>
+                        <th width="5%">No</th>
                         <th>Judul Laporan</th>
                         <th>Kategori</th>
                         <th>Tanggal</th>
@@ -26,6 +26,7 @@
                     </tr>
                 </thead>
                 <tbody id="table-body-api" class="table-border-bottom-0">
+                    {{-- Diisi via JS --}}
                 </tbody>
             </table>
         </div>
@@ -39,31 +40,61 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="modalTanggapi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Laporan & Tanggapan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">Detail & Berikan Tanggapan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modal-content-detail">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
+            <div class="modal-body">
+                <div class="bg-label-primary p-3 rounded mb-4">
+                    <div class="d-flex justify-content-between mb-2 border-bottom border-primary pb-2">
+                        <small class="text-uppercase fw-bold text-primary">Isi Laporan:</small>
+                        <small class="text-muted text-uppercase">Pelapor: <strong id="tampil_pelapor" class="text-dark">-</strong></small>
+                    </div>
+                    <p id="tampil_isi" class="mb-0 text-dark" style="white-space: normal;"></p>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+
+                <h6>Riwayat Tanggapan</h6>
+                <div id="list_tanggapan" class="mb-4" style="max-height: 250px; overflow-y: auto;">
+                </div>
+
+                <hr>
+                <form action="{{ route('tanggapan.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="laporan_id" id="lap_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Tanggapan Anda (Petugas)</label>
+                        <textarea name="tanggapan" class="form-control" rows="3" placeholder="Tulis instruksi atau jawaban..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Kirim Tanggapan</button>
+                </form>
             </div>
         </div>
     </div>
+    <form id="form-delete" action="" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
 </div>
+
 @endsection
 
 @push('scripts')
 <script>
+    function hapusLaporan(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus laporan ini?')) {
+            const form = document.getElementById('form-delete');
+            form.action = '/laporan/' + id;
+            form.submit();
+        }
+    }
     document.addEventListener('DOMContentLoaded', function() {
-        const modalEl = new bootstrap.Modal(document.getElementById('modalDetail'));
-        const modalContent = document.getElementById('modal-content-detail');
+        const modalEl = document.getElementById('modalTanggapi');
+        if (!modalEl) return console.error('HTML Modal tidak ditemukan!');
+
+        const modalTanggapi = new bootstrap.Modal(modalEl);
 
         function fetchLaporan(page = 1) {
             const tableBody = document.getElementById('table-body-api');
@@ -78,122 +109,103 @@
         }
 
         function renderTable(data, startNumber) {
-            const tableBody = document.getElementById('table-body-api');
-            tableBody.innerHTML = '';
+    const tableBody = document.getElementById('table-body-api');
+    tableBody.innerHTML = '';
 
-            data.forEach((item, index) => {
-                let badgeClass = item.status === 'Selesai' ? 'bg-label-success' :
-                                 (item.status === 'Diproses' ? 'bg-label-warning' :
-                                 (item.status === 'Ditolak' ? 'bg-label-danger' : 'bg-label-primary'));
+    data.forEach((item, index) => {
+        let badgeClass = item.status === 'Selesai' ? 'bg-label-success' :
+                         (item.status === 'Diproses' ? 'bg-label-warning' :
+                         (item.status === 'Ditolak' ? 'bg-label-danger' : 'bg-label-primary'));
 
-                const row = `
-                    <tr>
-                        <td>${startNumber + index}</td>
-                        <td><strong>${item.judul_laporan}</strong></td>
-                        <td><span class="text-info"><i class="bx bx-tag-alt me-1"></i>${item.kategori}</span></td>
-                        <td>${item.tanggal}</td>
-                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary btn-detail" data-id="${item.id}">
-                                <i class="bx bx-show me-1"></i> Detail
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
+        const row = `
+            <tr>
+                <td>${startNumber + index}</td>
+                <td><strong>${item.judul_laporan}</strong></td>
+                <td><span class="badge bg-label-info">${item.kategori}</span></td>
+                <td class="text-nowrap">${item.tanggal}</td>
+                <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                <td class="text-center">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-primary btn-tanggapi" data-id="${item.id}">
+                            Detail
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="hapusLaporan(${item.id})">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        tableBody.innerHTML += row;
+    });
 
-            document.querySelectorAll('.btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    showDetail(id);
-                });
-            });
-        }
+    document.querySelectorAll('.btn-tanggapi').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openModalTanggapi(this.getAttribute('data-id'));
+        });
+    });
+}
 
-        function showDetail(id) {
-            modalEl.show();
-            modalContent.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        function openModalTanggapi(id) {
+            const listTanggapan = document.getElementById('list_tanggapan');
+            const tampilIsi = document.getElementById('tampil_isi');
+            const tampilPelapor = document.getElementById('tampil_pelapor');
+            const inputLapId = document.getElementById('lap_id');
+
+            tampilIsi.innerText = 'Memuat...';
+            tampilPelapor.innerText = '...';
+            listTanggapan.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+            modalTanggapi.show();
 
             fetch(`/api/laporan/${id}`)
                 .then(response => response.json())
                 .then(result => {
                     const data = result.data;
+                    tampilIsi.innerText = data.isi_laporan;
+                    tampilPelapor.innerText = data.pelapor.nama;
+                    inputLapId.value = data.id;
 
-                    // Render Tanggapan
-                    let tanggapanHtml = '';
-                    if(data.daftar_tanggapan.length > 0) {
+                    let html = '';
+                    if (data.daftar_tanggapan.length > 0) {
                         data.daftar_tanggapan.forEach(t => {
-                            tanggapanHtml += `
-                                <div class="card bg-label-secondary mb-3">
+                            html += `
+                                <div class="card bg-label-secondary mb-2 border-0 shadow-none">
                                     <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span class="fw-bold"><i class="bx bx-user-voice me-1"></i>${t.petugas} (Petugas)</span>
-                                            <small class="text-muted">${t.tgl_tanggapan}</small>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold small text-primary"><i class="bx bx-user-voice me-1"></i>${t.petugas}</span>
+                                            <small class="text-muted" style="font-size: 0.7rem;">${t.tgl_tanggapan}</small>
                                         </div>
-                                        <p class="mb-0 text-dark">${t.isi_tanggapan}</p>
+                                        <p class="mb-0 small text-dark">${t.isi_tanggapan}</p>
                                     </div>
                                 </div>`;
                         });
                     } else {
-                        tanggapanHtml = '<div class="alert alert-secondary text-center">Belum ada tanggapan dari petugas.</div>';
+                        html = '<div class="text-center text-muted my-3 small italic">Belum ada riwayat tanggapan.</div>';
                     }
-
-                    modalContent.innerHTML = `
-                        <div class="row">
-                            <div class="col-md-7 border-end">
-                                <h6 class="text-muted text-uppercase small">Isi Laporan</h6>
-                                <p class="fw-bold text-dark" style="font-size: 1.1rem;">${data.isi_laporan}</p>
-                                <hr>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <small class="d-block text-muted">Pelapor</small>
-                                        <p class="fw-semibold">${data.pelapor.nama}</p>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="d-block text-muted">Kategori</small>
-                                        <p class="fw-semibold"><span class="badge bg-label-info">${data.kategori}</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <h6 class="text-muted text-uppercase small">Tanggapan Petugas</h6>
-                                <div style="max-height: 300px; overflow-y: auto;">
-                                    ${tanggapanHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    listTanggapan.innerHTML = html;
                 });
         }
 
         function renderPagination(meta, links) {
             const paginationLinks = document.getElementById('pagination-links');
             paginationLinks.innerHTML = '';
-
             meta.links.forEach(link => {
                 const activeClass = link.active ? 'active' : '';
                 const disabledClass = !link.url ? 'disabled' : '';
-
-                // Bersihkan label (untuk Previous/Next)
                 let label = link.label.replace('&laquo; ', '').replace(' &raquo;', '');
                 if(label === 'Previous') label = '<i class="bx bx-chevron-left"></i>';
                 if(label === 'Next') label = '<i class="bx bx-chevron-right"></i>';
 
-                const li = `
+                paginationLinks.innerHTML += `
                     <li class="page-item ${activeClass} ${disabledClass}">
-                        <a class="page-link" href="javascript:void(0);" data-url="${link.url}">${label}</a>
+                        <a class="page-link shadow-none" href="javascript:void(0);" data-url="${link.url}">${label}</a>
                     </li>`;
-                paginationLinks.innerHTML += li;
             });
 
             document.querySelectorAll('.page-link').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const url = this.getAttribute('data-url');
-                    if(url) {
-                        const page = new URL(url).searchParams.get('page');
-                        fetchLaporan(page);
-                    }
+                    if(url) fetchLaporan(new URL(url).searchParams.get('page'));
                 });
             });
         }

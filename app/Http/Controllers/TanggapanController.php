@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Laporan;
 use App\Models\Tanggapan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TanggapanController extends Controller
 {
@@ -26,9 +28,30 @@ class TanggapanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        //
+        $request->validate([
+            'laporan_id' => 'required',
+            'tanggapan' => 'required|min:5',
+        ]);
+
+        $userId = Auth::id() ?? 1;
+        Tanggapan::create([
+            'laporan_id' => $request->laporan_id,
+            'tgl_tanggapan' => now(),
+            'tanggapan' => $request->tanggapan,
+            'user_id' => $userId,
+        ]);
+
+        Laporan::where('id', $request->laporan_id)->update(['status' => 'Diproses']);
+
+        return back()->with('success', 'Tanggapan berhasil dikirim!');
+    }
+
+    public function destroy($id)
+    {
+        Tanggapan::findOrFail($id)->delete();
+        return back()->with('success', 'Tanggapan telah dihapus.');
     }
 
     /**
@@ -58,8 +81,4 @@ class TanggapanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Tanggapan $tanggapan)
-    {
-        //
-    }
 }

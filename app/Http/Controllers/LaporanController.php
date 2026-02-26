@@ -56,14 +56,23 @@ class LaporanController extends Controller
      */
     public function update(Request $request, Laporan $laporan)
     {
-        //
+        $request->validate([
+            'status' => 'required|in:Diajukan,Diproses,Selesai,Ditolak',
+        ]);
+
+        $laporan->update(['status' => $request->status]);
+        return redirect()->back()->with('success', 'Status laporan berhasil diubah ke ' . $request->status);
     }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Laporan $laporan)
-    {
-        //
-    }
+{
+   
+
+    $laporan->delete();
+
+    return redirect()->back()->with('success', 'Laporan berhasil dihapus selamanya!');
+}
 }

@@ -7,59 +7,38 @@ use Illuminate\Http\Request;
 
 class KategoriLaporanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $categories = KategoriLaporan::latest()->get();
+        return view('kategori.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_kategori' => 'required|unique:kategori_laporans,nama_kategori|max:255',
+            'deskripsi' => 'nullable'
+        ]);
+
+        KategoriLaporan::create($request->all());
+        return back()->with('success', 'Kategori baru berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(KategoriLaporan $kategoriLaporan)
+    public function update(Request $request, $id)
     {
-        //
+        $kategori = KategoriLaporan::findOrFail($id);
+        $request->validate([
+            'nama_kategori' => 'required|max:255|unique:kategori_laporans,nama_kategori,'.$id,
+            'deskripsi' => 'nullable'
+        ]);
+
+        $kategori->update($request->all());
+        return back()->with('success', 'Kategori berhasil diperbarui!');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(KategoriLaporan $kategoriLaporan)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, KategoriLaporan $kategoriLaporan)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(KategoriLaporan $kategoriLaporan)
-    {
-        //
+        KategoriLaporan::findOrFail($id)->delete();
+        return back()->with('success', 'Kategori telah dihapus.');
     }
 }

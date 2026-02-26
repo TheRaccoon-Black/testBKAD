@@ -42,7 +42,7 @@
                 <div class="app-brand demo">
                     {{-- <a href="{{ route('dashboard') }}" class="app-brand-link"> --}}
                         <span class="app-brand-logo demo">
-                            {{-- Logo BKAD --}}
+
                             <i class='bx bxs-buildings text-primary' style="font-size: 2rem;"></i>
                         </span>
                         <span class="app-brand-text demo menu-text fw-bold ms-2">BKAD LAPOR</span>
@@ -59,7 +59,7 @@
                 <ul class="menu-inner py-1">
                     {{-- Dashboard --}}
                     <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        {{-- <a href="{{ route('dashboard') }}" class="menu-link"> --}}
+                        <a href="" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Dashboard</div>
                         </a>
@@ -78,7 +78,7 @@
                         </a>
                     </li>
 
-                    {{-- Portal Publik (API View) --}}
+                    {{-- Portal Publik  --}}
                     <li class="menu-item {{ request()->routeIs('laporan.publik') ? 'active' : '' }}">
                         <a href="{{ route('laporan.publik') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-globe"></i>
@@ -89,6 +89,14 @@
                     {{-- Master Data Section --}}
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Master Data</span>
+                    </li>
+
+                    {{-- Portal Publik  --}}
+                    <li class="menu-item {{ request()->routeIs('kategori.publik') ? 'active' : '' }}">
+                        <a href="{{ route('kategori.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-globe"></i>
+                            <div data-i18n="Portal Publik">Manajemen Kategori</div>
+                        </a>
                     </li>
 
 
@@ -159,6 +167,32 @@
 
                 {{-- Content Wrapper --}}
                 <div class="content-wrapper">
+                    <div class="content-wrapper">
+                        <div class="container-xxl">
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                    <i class="bx bx-check-circle me-1"></i>
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            @if($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                    <ul class="mb-0">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            @endif
+                        </div>
+
+                        @yield('content')
+                    </div>
                     @yield('content')
 
                     <footer class="content-footer footer bg-footer-theme">

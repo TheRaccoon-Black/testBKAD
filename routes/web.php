@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\KategoriLaporanController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\TanggapanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,3 +24,6 @@ Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])
 Route::get('/portal-publik', function () {
     return view('laporan.publik');
 })->name('laporan.publik');
+Route::resource('kategori', KategoriLaporanController::class);
+Route::resource('laporan', LaporanController::class);
+Route::resource('tanggapan', TanggapanController::class);
