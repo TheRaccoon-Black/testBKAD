@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('laporan.index');
 });
 
 Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
